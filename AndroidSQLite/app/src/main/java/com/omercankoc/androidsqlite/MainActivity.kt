@@ -19,13 +19,15 @@ class MainActivity : AppCompatActivity() {
     // Olusturulan menuyu baglama operasyonu.
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
+        // Inflater : XML görünüm tanımını okuyan ve
+        // bunları Kotlin tabanlı View nesnelerine dönüştüren bir sınıftır.
         val menuInflater : MenuInflater = menuInflater
         menuInflater.inflate(R.menu.menu_add,menu)
 
         return super.onCreateOptionsMenu(menu)
     }
 
-    // Secilen item'in ne oldugunu tanimlayip, yapilacak operasyonu belirt.
+    // Menude secilen item'in hangisi oldugunu tanimlayip, secim sonrasi yapilacak operasyonu belirt.
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         if(item.itemId == R.id.add_item){
