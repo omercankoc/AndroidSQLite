@@ -37,12 +37,14 @@ class DetailActivity : AppCompatActivity() {
             editTextCreator.setText("")
             editTextYear.setText("")
             // Yeni veri eklenirken Kayit butonunu gorunmez yap.
-            buttonSave.visibility = View.INVISIBLE
+            buttonSave.visibility = View.VISIBLE
             // Yeni veri eklenirken image view background'unu ata.
             val selectedImageBackground = BitmapFactory.decodeResource(applicationContext.resources,R.drawable.ic_launcher_background)
             imageView.setImageBitmap(selectedImageBackground)
         } else {
-            buttonSave.visibility = View.VISIBLE
+            buttonSave.visibility = View.INVISIBLE
+            val selectedId = intent.getIntExtra("id",1)
+
         }
     }
 
@@ -103,7 +105,7 @@ class DetailActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    fun buttonSave(view : View){
+    fun onClickSave(view : View){
 
         val language = editTextLanguage.text.toString()
         val creator = editTextCreator.text.toString()

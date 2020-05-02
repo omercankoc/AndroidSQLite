@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         val ids = ArrayList<Int>()
 
         // Array Adapter : UI elemanı ile veri setini baglayan yapi.
-        val arrayAdapter = ArrayAdapter(this,android.R.layout.simple_expandable_list_item_1,languages)
+        val arrayAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1,languages)
         listView.adapter = arrayAdapter
 
         try {
