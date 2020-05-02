@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -27,6 +28,22 @@ class DetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
+
+        // Kullanici yeni veri girisi mi yapacak, mevcut verinin detaylarina mi ulasacak?
+        val intent = intent
+        val detail =  intent.getStringExtra("detail")
+        if(detail.equals("create")){
+            editTextLanguage.setText("")
+            editTextCreator.setText("")
+            editTextYear.setText("")
+            // Yeni veri eklenirken Kayit butonunu gorunmez yap.
+            buttonSave.visibility = View.INVISIBLE
+            // Yeni veri eklenirken image view background'unu ata.
+            val selectedImageBackground = BitmapFactory.decodeResource(applicationContext.resources,R.drawable.ic_launcher_background)
+            imageView.setImageBitmap(selectedImageBackground)
+        } else {
+            buttonSave.visibility = View.VISIBLE
+        }
     }
 
     fun onClickSelectImage(view : View){
@@ -86,7 +103,7 @@ class DetailActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    fun onClickSave(view : View){
+    fun buttonSave(view : View){
 
         val language = editTextLanguage.text.toString()
         val creator = editTextCreator.text.toString()
