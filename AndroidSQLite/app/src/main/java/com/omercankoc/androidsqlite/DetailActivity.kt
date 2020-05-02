@@ -1,6 +1,7 @@
 package com.omercankoc.androidsqlite
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -89,15 +90,35 @@ class DetailActivity : AppCompatActivity() {
 
         val language = editTextLanguage.text.toString()
         val creator = editTextCreator.text.toString()
-        val year = editTextYear.text.toString().toIntOrNull()
+        val year = editTextYear.text.toString()
 
         if(selectedBitmap != null){
             // Image sikistirip bir veri setine cevirir.
             var smallBitmap = makeSmallerBitmap(selectedBitmap!!,300)
+
             val outputStream = ByteArrayOutputStream()
             smallBitmap.compress(Bitmap.CompressFormat.PNG,50,outputStream)
             val byteArray = outputStream.toByteArray()
+
+            try {
+                // DB olustur veya olusmus ise ac.
+                val database = this.openOrCreateDatabase("Languages",Context.MODE_PRIVATE,null)
+                database.execSQL("CREATE TABLE IF NOT EXISTS languages (id INTEGER PRIMARY KEY, language VARCHAR, creator VARCHAR, year VARCHAR, image BLOB)")
+                // Olusturulan DB'ye kayit ekle.
+                val sqlString = "INSERT INTO languages (language, creator, year, image) VALUES (?,?,?,?)"
+                val statement = database.compileStatement(sqlString)
+                statement.bindString(1,language)
+                statement.bindString(2,creator)
+                statement.bindString(3,year)
+                statement.bindBlob(4,byteArray)
+
+                statement.execute()
+            }
+            catch (e:Exception){
+                e.printStackTrace()
+            }
         }
+        finish()
     }
 
     // Bitmap Kucultme Operasyonu.
