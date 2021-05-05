@@ -1,6 +1,6 @@
 ## Sample of using SQLite with Android
 
-This repository includes android and sqlite project sample. Let's create a database first. Let's examine the 4 basic operations later.
+This repository includes android and sqlite project sample. First, let's create a database and examine the 4 basic operations later.
 
 If not, create a table and name it 'language':
 ```kotlin
