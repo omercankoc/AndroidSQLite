@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -38,6 +39,53 @@ class DetailsActivity : AppCompatActivity() {
         editTextDeveloper = findViewById(R.id.editTextDeveloper)
         editTextYear = findViewById(R.id.editTextYear)
         buttonSave = findViewById(R.id.buttonSave)
+
+        // Yeni bir kayit mi olusturuluyor var olan kayit mi goruntuleniyor...
+        val intent = intent
+        val info = intent.getStringExtra("info")
+
+        if(info.equals("new")){
+            // Yeni kayit olustur.
+            editTextLanguage.setText("")
+            editTextDeveloper.setText("")
+            editTextYear.setText("")
+            buttonSave.visibility = View.VISIBLE
+            // Adobe XD ile Android ciktisi alindiginda calisacaktir...
+            //val selectedImageBackground = BitmapFactory.decodeResource(applicationContext.resources, R.drawable.ic_launcher_background)
+            //imageViewLogo.setImageBitmap(selectedImageBackground)
+        } else {
+            // Var olan kayidi goster.
+            buttonSave.visibility = View.INVISIBLE
+            // Gelen ID bilgisini al ve o ID'ye ait verileri getir.
+            val selectedId = intent.getIntExtra("id",1)
+
+            try {
+                val database = this.openOrCreateDatabase("Languages",Context.MODE_PRIVATE,null)
+                val cursor = database.rawQuery("SELECT * FROM languages WHERE id = ?", arrayOf(selectedId.toString()))
+                val languageIndex = cursor.getColumnIndex("language")
+                val developerIndex = cursor.getColumnIndex("developer")
+                val yearIndex = cursor.getColumnIndex("year")
+                val imageIndex = cursor.getColumnIndex("image")
+
+                while (cursor.moveToNext()){
+                    editTextLanguage.setText(cursor.getString(languageIndex))
+                    editTextDeveloper.setText(cursor.getString(developerIndex))
+                    editTextYear.setText(cursor.getString(yearIndex))
+
+                    val byteArray = cursor.getBlob(imageIndex)
+                    val bitmap = BitmapFactory.decodeByteArray(byteArray,0,byteArray.size)
+                    imageViewLogo.setImageBitmap(bitmap)
+                }
+
+                // Guncelle.
+                //arrayAdapter.notifyDataSetChanged()
+
+                cursor.close()
+            } catch (e : java.lang.Exception){
+                e.printStackTrace()
+            }
+
+        }
     }
 
     fun select(view : View){
@@ -125,9 +173,9 @@ class DetailsActivity : AppCompatActivity() {
 
     // Kaydetme islemini yap.
     fun save(view: View){
-        val language = editTextLanguage.text.toString()
-        val developer = editTextDeveloper.text.toString()
-        val year = editTextYear.text.toString()
+        val saveLanguage = editTextLanguage.text.toString()
+        val saveDeveloper = editTextDeveloper.text.toString()
+        val saveYear = editTextYear.text.toString()
 
         // Image sikistirip encode et.
         if(selectedBitmap != null){
@@ -144,17 +192,21 @@ class DetailsActivity : AppCompatActivity() {
                 // SQL kodu ile degiskenleri bagla.
                 val sqlString = "INSERT INTO languages(language,developer,year,image) VALUES (?,?,?,?)"
                 val statement = database.compileStatement(sqlString)
-                statement.bindString(1,language)
-                statement.bindString(2,developer)
-                statement.bindString(3,year)
+                statement.bindString(1,saveLanguage)
+                statement.bindString(2,saveDeveloper)
+                statement.bindString(3,saveYear)
                 statement.bindBlob(4,byteArray)
                 // SQL kodunu isle.
                 statement.execute()
             } catch (e : Exception){
                 e.printStackTrace()
             }
-            finish()
-        }
 
+            val intent = Intent(this,ListViewActivity::class.java)
+            // Oncesindeki tum Activity'leri kapat.
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(intent)
+            //finish()
+        }
     }
 }
