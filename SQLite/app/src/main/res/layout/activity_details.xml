@@ -12,6 +12,7 @@
         android:id="@+id/imageViewLogo"
         android:layout_width="200dp"
         android:layout_height="200dp"
+        android:onClick="select"
         app:srcCompat="@android:drawable/ic_input_add"
         tools:layout_editor_absoluteX="105dp"
         tools:layout_editor_absoluteY="25dp" />
@@ -45,6 +46,15 @@
         android:inputType="number"
         android:textColor="@color/black"
         android:gravity="center" />
+
+    <Button
+        android:id="@+id/buttonSave"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:onClick="save"
+        android:text="Save"
+        android:textColor="@color/white">
+    </Button>
 
 
 </LinearLayout>
