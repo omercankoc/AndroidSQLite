@@ -1,7 +1,9 @@
 package com.omercankoc.sqlite
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -14,10 +16,12 @@ import android.widget.EditText
 import android.widget.ImageView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import java.io.ByteArrayOutputStream
 
 class DetailsActivity : AppCompatActivity() {
 
     var selectedLogo : Uri? = null
+    var selectedBitmap : Bitmap? = null
 
     private lateinit var imageViewLogo : ImageView
     private lateinit var editTextLanguage : EditText
@@ -78,14 +82,14 @@ class DetailsActivity : AppCompatActivity() {
                     // Versiyon 28'den buyuk ise...
                     if(Build.VERSION.SDK_INT >= 28){
                         val source = ImageDecoder.createSource(this.contentResolver,selectedLogo!!)
-                        val bitmap = ImageDecoder.decodeBitmap(source)
-                        imageViewLogo.setImageBitmap(bitmap)
+                        selectedBitmap = ImageDecoder.decodeBitmap(source)
+                        imageViewLogo.setImageBitmap(selectedBitmap)
                     }
 
                     // Versiyon 28'den kucuk ise...
                     else {
-                        val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver,selectedLogo)
-                        imageViewLogo.setImageBitmap(bitmap)
+                        selectedBitmap = MediaStore.Images.Media.getBitmap(this.contentResolver,selectedLogo)
+                        imageViewLogo.setImageBitmap(selectedBitmap)
                     }
                 }
 
@@ -97,7 +101,60 @@ class DetailsActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    // Resimi sikistirma islemini yap...
+    fun compression(image : Bitmap, maximumSize : Int) : Bitmap {
+        var width = image.width
+        var height = image.height
+
+        val bitmapRatio : Double = width.toDouble() / height.toDouble()
+
+        if(bitmapRatio > 1){
+            // Gorsel yatay...
+            width = maximumSize
+            val scaledHeight = width / bitmapRatio
+            height = scaledHeight.toInt()
+        } else {
+            // Gorsel dikey...
+            height = maximumSize
+            val scaledWidth = height * bitmapRatio
+            width = scaledWidth.toInt()
+        }
+
+        return Bitmap.createScaledBitmap(image,width,height,true)
+    }
+
+    // Kaydetme islemini yap.
     fun save(view: View){
+        val language = editTextLanguage.text.toString()
+        val developer = editTextDeveloper.text.toString()
+        val year = editTextYear.text.toString()
+
+        // Image sikistirip encode et.
+        if(selectedBitmap != null){
+            val compressBitmap = compression(selectedBitmap!!,300)
+
+            val outputStream = ByteArrayOutputStream()
+            compressBitmap!!.compress(Bitmap.CompressFormat.PNG,50,outputStream)
+            val byteArray = outputStream.toByteArray()
+
+            try {
+                val database = this.openOrCreateDatabase("Languages",Context.MODE_PRIVATE,null)
+                database.execSQL("CREATE TABLE IF NOT EXISTS languages (id INTEGER PRIMARY KEY, language VARCHAR, developer VARCHAR, year VARCHAR, image BLOB)")
+
+                // SQL kodu ile degiskenleri bagla.
+                val sqlString = "INSERT INTO languages(language,developer,year,image) VALUES (?,?,?,?)"
+                val statement = database.compileStatement(sqlString)
+                statement.bindString(1,language)
+                statement.bindString(2,developer)
+                statement.bindString(3,year)
+                statement.bindBlob(4,byteArray)
+                // SQL kodunu isle.
+                statement.execute()
+            } catch (e : Exception){
+                e.printStackTrace()
+            }
+            finish()
+        }
 
     }
 }
